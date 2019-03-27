@@ -55,7 +55,7 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
     icov.list1[[i]] = matrix(0,d,d)
   }
   if (!is.null(doPar.clusters)) doParallel::registerDoParallel(doPar.clusters)
-  foreach (j = 1:d) { # d = ncol(Z)
+  foreach (j = 1:d) %dopar% { # d = ncol(Z)
       Z.j = Z[,j]
       Z.resj = Z[,-j]
       Zy = ZZ[-j,j]
