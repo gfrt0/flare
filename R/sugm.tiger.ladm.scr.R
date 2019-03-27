@@ -13,8 +13,8 @@
 #----------------------------------------------------------------------------------#
 
 sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
-                                shrink, prec, max.ite, verbose, doPar.clusters){
-
+                                shrink, prec, max.ite, verbose, doPar.clusters,
+                                doPar.verbose){
   if(verbose==TRUE)
     cat("Tuning-Insensitive Graph Estimation and Regression.\n")
   Z = data
@@ -51,11 +51,13 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
   col.cnz = rep(0,d+1)
   row.idx = rep(0,d*maxdf*nlambda)
   icov.list1 = vector("list", nlambda)
+  cat("d:", d, "| nlambda:", nlambda)
   for(i in 1:nlambda){
     icov.list1[[i]] = matrix(0,d,d)
   }
   if (!is.null(doPar.clusters)) doParallel::registerDoParallel(doPar.clusters)
-  foreach (j = 1:d) %dopar% { # d = ncol(Z)
+  foreachlist <- foreach (j = 1:d, .verbose = doPar.verbose, .combine = list,
+                          .multicombine = T, .packages = "flare") %dopar% { # d = ncol(Z)
       Z.j = Z[,j]
       Z.resj = Z[,-j]
       Zy = ZZ[-j,j]
@@ -85,35 +87,43 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
              as.integer(num.scr1), as.integer(num.scr2),
              as.integer(idx.scr0), as.integer(idx.scr1), as.integer(idx.scr2),
              as.integer(max.ite), as.double(prec), as.integer(j), PACKAGE="flare")
-      icov = matrix(unlist(str[5]), byrow = FALSE, ncol = nlambda)
-      for(i in 1:nlambda){
-        icov.list1[[i]][,j] = icov[,i]
-      }
-      cnt = unlist(str[13])
-      col.cnz[j+1] = cnt+col.cnz[j]
-      if(cnt>0){
-        x[(col.cnz[j]+1):col.cnz[j+1]] = unlist(str[6])[1:cnt]
-        row.idx[(col.cnz[j]+1):col.cnz[j+1]] = unlist(str[14])[1:cnt]
-      }
-      ite.int[j,] = unlist(str[15])
-      ite.int1[j,] = unlist(str[16])
-      ite.int2[j,] = unlist(str[17])
-      ite.int3[j,] = unlist(str[18])
-      ite.int4[j,] = unlist(str[19])
-      ite.int5[j,] = unlist(str[20])
+      # str is a list with elements in the sequence provided to .C; e.g. [27] = prec.
+      return(str)
     }
-  if (!is.null(doPar.clusters)) foreach::registerDoSEQ()
-  icov.list = vector("list", nlambda)
-  for(i in 1:nlambda){
-    icov.i = icov.list1[[i]]
-#     icov.list[[i]] = icov.i*(abs(icov.i)<=abs(t(icov.i)))+t(icov.i)*(abs(t(icov.i))<abs(icov.i))
+  assign("foreachlist", foreachlist, envir = .GlobalEnv)
+  for (j in 1:d) {
+    message(j)
+    icov = matrix(unlist(foreachlist[[j]][5]), byrow = FALSE, ncol = nlambda)
+    for(i in 1:nlambda){
+      icov.list1[[i]][,j] = icov[,i]
+    }
+    cnt = unlist(foreachlist[[j]][13])
+    col.cnz[j+1] = cnt+col.cnz[j]
+
+    if(cnt>0){
+      x[(col.cnz[j]+1):col.cnz[j+1]] = unlist(foreachlist[[j]][6])[1:cnt]
+      row.idx[(col.cnz[j]+1):col.cnz[j+1]] = unlist(foreachlist[[j]][14])[1:cnt]
+
+      ite.int[j,] = unlist(foreachlist[[j]][15])
+      ite.int1[j,] = unlist(foreachlist[[j]][16])
+      ite.int2[j,] = unlist(foreachlist[[j]][17])
+      ite.int3[j,] = unlist(foreachlist[[j]][18])
+      ite.int4[j,] = unlist(foreachlist[[j]][19])
+      ite.int5[j,] = unlist(foreachlist[[j]][20])
+    }
   }
+  if (!is.null(doPar.clusters)) foreach::registerDoSEQ()
+   icov.list = vector("list", nlambda)
+  # for(i in 1:nlambda){
+  #       icov.i = icov.list1[[i]]
+  #       icov.list[[i]] = icov.i*(abs(icov.i)<=abs(t(icov.i)))+t(icov.i)*(abs(t(icov.i))<abs(icov.i))
+  #}
   ite = list()
   ite[[1]] = ite.int1
   ite[[2]] = ite.int2
   ite[[3]] = ite.int
-#   ite[[4]] = ite.int4
-#   ite[[5]] = ite.int5
-#   ite[[6]] = ite.int3
+  #   ite[[4]] = ite.int4
+  #   ite[[5]] = ite.int5
+  #   ite[[6]] = ite.int3
   return(list(icov=icov.list, icov1=icov.list1,ite=ite, x=x[1:col.cnz[d+1]], col.cnz=col.cnz, row.idx=row.idx[1:col.cnz[d+1]]))
 }

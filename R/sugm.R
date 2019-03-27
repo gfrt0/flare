@@ -24,7 +24,8 @@ sugm <- function(data,
                  standardize = FALSE,
                  perturb = TRUE,
                  verbose = TRUE,
-                 doPar.clusters = NULL)
+                 doPar.clusters = NULL,
+                 doPar.verbose = FALSE)
 {
   if(verbose) {
       cat("High-dimensional Sparse Undirected Graphical Models.\n")
@@ -163,7 +164,7 @@ sugm <- function(data,
 
     # The actual computation step
     re.sugm = sugm.tiger.ladm.scr(data, n, d, maxdf, rho, lambda, shrink, prec, max.ite,
-                                  verbose, doPar.clusters)
+                                  verbose, doPar.clusters, doPar.verbose)
 
     for(i in 1:nlambda){
       re.sugm$icov1[[i]] = diag.cov.invsq%*%re.sugm$icov1[[i]]%*%diag.cov.invsq
