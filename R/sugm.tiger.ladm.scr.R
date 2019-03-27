@@ -102,7 +102,7 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
       ite.int4[j,] = unlist(str[19])
       ite.int5[j,] = unlist(str[20])
     }
-  is (!is.null(doPar.clusters) doParallel::registerDoSEQ
+  if (!is.null(doPar.clusters)) doParallel::registerDoSEQ()
   icov.list = vector("list", nlambda)
   for(i in 1:nlambda){
     icov.i = icov.list1[[i]]
