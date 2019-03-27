@@ -87,6 +87,7 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
              as.integer(idx.scr0), as.integer(idx.scr1), as.integer(idx.scr2),
              as.integer(max.ite), as.double(prec), as.integer(j), PACKAGE="flare")
       # str is a list with elements in the sequence provided to .C; e.g. [27] = prec.
+      str[[1]] <- str[[2]] <- str[[3]] <- NA
       return(str)
     }
   for (j in 1:d) {
