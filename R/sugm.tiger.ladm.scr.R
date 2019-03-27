@@ -77,16 +77,17 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
       col.cnz0 = 0
       row.idx0 = rep(0,maxdf*nlambda)
       str=.C("sugm_tiger_ladm_scr", as.double(Z.j), as.double(Z.resj),
-             as.double(Zy),
-             as.double(Z.order), as.double(icov0), as.double(x0), as.integer(d),
-             as.integer(n), as.double(gamma), as.double(lambda), as.integer(nlambda),
-             as.double(rho), as.integer(col.cnz0), as.integer(row.idx0),
-             as.integer(ite0.int), as.integer(ite0.int1), as.integer(ite0.int2),
-             as.integer(ite0.int3), as.integer(ite0.int4), as.integer(ite0.int5),
-             as.integer(num.scr1), as.integer(num.scr2),
+             as.double(Zy), as.double(Z.order), as.double(icov0), as.double(x0),
+             as.integer(d), as.integer(n), as.double(gamma), as.double(lambda),
+             as.integer(nlambda), as.double(rho), as.integer(col.cnz0),
+             as.integer(row.idx0), as.integer(ite0.int), as.integer(ite0.int1),
+             as.integer(ite0.int2), as.integer(ite0.int3), as.integer(ite0.int4),
+             as.integer(ite0.int5), as.integer(num.scr1), as.integer(num.scr2),
              as.integer(idx.scr0), as.integer(idx.scr1), as.integer(idx.scr2),
              as.integer(max.ite), as.double(prec), as.integer(j), PACKAGE="flare")
       # str is a list with elements in the sequence provided to .C; e.g. [27] = prec.
+      # drop burdensome returned data that is not used in further computations.
+      str[[1]] <- str[[2]] <- str[[3]] <- str[[4]] <- NA
       return(str)
     }
   for (j in 1:d) {
