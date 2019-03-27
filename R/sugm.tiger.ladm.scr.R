@@ -51,7 +51,6 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
   col.cnz = rep(0,d+1)
   row.idx = rep(0,d*maxdf*nlambda)
   icov.list1 = vector("list", nlambda)
-  cat("d:", d, "| nlambda:", nlambda)
   for(i in 1:nlambda){
     icov.list1[[i]] = matrix(0,d,d)
   }
@@ -90,9 +89,7 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
       # str is a list with elements in the sequence provided to .C; e.g. [27] = prec.
       return(str)
     }
-  assign("foreachlist", foreachlist, envir = .GlobalEnv)
   for (j in 1:d) {
-    message(j)
     icov = matrix(unlist(foreachlist[[j]][5]), byrow = FALSE, ncol = nlambda)
     for(i in 1:nlambda){
       icov.list1[[i]][,j] = icov[,i]
