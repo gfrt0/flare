@@ -1,6 +1,6 @@
 useDynLib("flare", .registration=TRUE)
-import("MASS","Matrix","lattice","igraph")
-export("sugm", 
+import("MASS","Matrix","lattice","igraph","doParallel")
+export("sugm",
        "sugm.generator",
        "sugm.clime.ladm.scr",
        "sugm.tiger.ladm.scr",
