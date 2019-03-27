@@ -9,6 +9,7 @@
 # Modified
 # Author: Giuseppe Forte                                                           #
 # Date: Mar 27th 2019                                                              #
+# Description of modification: introduced doParallel support.
 #----------------------------------------------------------------------------------#
 
 sugm <- function(data,
@@ -162,7 +163,7 @@ sugm <- function(data,
     if(is.null(shrink)) shrink=0
     if(is.null(max.ite)) max.ite=1e4
 
-    # The actual computation step
+    # The actual computation step - doParallel is used in here
     re.sugm = sugm.tiger.ladm.scr(data, n, d, maxdf, rho, lambda, shrink, prec, max.ite,
                                   verbose, doPar.clusters, doPar.verbose)
 
