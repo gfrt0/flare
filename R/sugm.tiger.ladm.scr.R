@@ -56,7 +56,8 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
   }
   if (!is.null(doPar.clusters)) doParallel::registerDoParallel(doPar.clusters)
   foreachlist <- foreach (j = 1:d, .verbose = doPar.verbose, .combine = list,
-                          .multicombine = T, .packages = "flare") %dopar% { # d = ncol(Z)
+                          .multicombine = T, .maxcombine = d+1,
+                          .packages = "flare") %dopar% { # d = ncol(Z)
       Z.j = Z[,j]
       Z.resj = Z[,-j]
       Zy = ZZ[-j,j]
@@ -76,7 +77,7 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
       x0 = rep(0,maxdf*nlambda)
       col.cnz0 = 0
       row.idx0 = rep(0,maxdf*nlambda)
-      if (verbose) cat("Regression ",j," of ",d,"...")
+      if (verbose) cat("Column ",j," of ",d,"\n")
       str=.C("sugm_tiger_ladm_scr", as.double(Z.j), as.double(Z.resj),
              as.double(Zy), as.double(Z.order), as.double(icov0), as.double(x0),
              as.integer(d), as.integer(n), as.double(gamma), as.double(lambda),
@@ -88,10 +89,6 @@ sugm.tiger.ladm.scr <- function(data, n, d, maxdf, rho, lambda,
              as.integer(max.ite), as.double(prec), as.integer(j), PACKAGE="flare")
       # str is a list with elements in the sequence provided to .C; e.g. [27] = prec.
       # drop burdensome returned data that is not used in further computations.
-      if (verbose) {
-        if (j == d) cat(': Done')
-          else cat('\014')
-        }
       str[[1]] <- str[[2]] <- str[[3]] <- str[[4]] <- NA
       return(str)
     }
